@@ -8,6 +8,7 @@
 @import "css/post.css";
 @import "css/comments.css";
 @import "css/gallery.css";
+@import "css/timeline.css";
 
 /* Make the links black */
 :root {
@@ -35,29 +36,26 @@ main {
   fill: var(--color-background-inv);
 }
 
-.arrow {
-  border: solid var(--color-text);
-  border-width: 0 5px 5px 0;
-  display: inline-block;
-  padding: 5px;
+.waves {
+  z-index:1;
+  position:fixed;
+  height:200px;
+  width:100%;
 }
 
-.right {
-  transform: rotate(-45deg);
-  -webkit-transform: rotate(-45deg);
+.body-position {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width:100vw;
+  z-index: 70;
+  height:100vh;
 }
 
-.left {
-  transform: rotate(135deg);
-  -webkit-transform: rotate(135deg);
+.page {
+  position:relative;
+  z-index:2;
 }
 
-.up {
-  transform: rotate(-135deg);
-  -webkit-transform: rotate(-135deg);
-}
-
-.down {
-  transform: rotate(45deg);
-  -webkit-transform: rotate(45deg);
-}

@@ -1,5 +1,5 @@
 ---
-layout: layouts/page.vto
+layout: layouts/page.ts
 title: Connect
 url: /connect/
 menu:

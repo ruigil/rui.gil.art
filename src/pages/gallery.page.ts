@@ -1,12 +1,11 @@
 
-
 const listFiles = async (path:string) => {
   const files = await Deno.readDir(path)
   return files
 }
 
 const folderContent = (name:string,curl:string) => {
-  return `
+  return /*html*/ `
     <div class="responsive">
       <div class="gallery">
         <a href="${curl.toLowerCase() + name.toLowerCase()}">
@@ -17,6 +16,7 @@ const folderContent = (name:string,curl:string) => {
     </div>
   `
 }
+
 const photoContent = ( name:string, curl:string) => {
   return `<img class="image-thumb" src="../../media${curl.substring(8)}${name}" alt="Photo">`
 }
@@ -45,7 +45,7 @@ async function* processDirectory(name:string = "", curl:string = "/"):AsyncGener
     }
   };
 
-  const photos = `
+  const photos = /*html*/ `
     <div class="row">
       <div class="column">${columns[0]}</div>
       <div class="column">${columns[1]}</div>
@@ -54,7 +54,7 @@ async function* processDirectory(name:string = "", curl:string = "/"):AsyncGener
     </div>`
 
   const back = curl === "/gallery/" ? `` : `<a href=".."><i class="arrow left"></i>Back</a>`
-  const modal = `
+  const modal = /*html*/`
     <div id="myModal" class="modal">
       <div >
         <img class="modal-content" id="img01">
@@ -64,13 +64,13 @@ async function* processDirectory(name:string = "", curl:string = "/"):AsyncGener
 
   const clearFix = "<div class='clearfix'></div>"
   
+  
   yield {
-    layout: "layouts/page.vto",
+    layout: "layouts/page.ts",
     title: name,
     url: curl,
     menu: curl === "/gallery/" ? { visible: true, order: 2 } : { visible: false },
-    bodyClass: "body-home",
-    content: back + clearFix + folders + clearFix + photos + modal
+    content: `${back}${clearFix}${folders}${clearFix}${photos}${modal}`
   }
 }
 

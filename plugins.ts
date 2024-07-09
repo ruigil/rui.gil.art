@@ -60,9 +60,8 @@ export default function (userOptions?: Options) {
       .use(sitemap())
       .use(feed(options.feed))
       .copy("fonts")
-      .copy("js")
+      .copy("assets")
       .copy("favicon.png")
-      .copy("wave.png")
       .copy("/media")
       .mergeKey("extra_head", "stringArray")
       .preprocess([".md"], (pages) => {
@@ -76,10 +75,5 @@ export default function (userOptions?: Options) {
     // Alert plugin
     site.hooks.addMarkdownItPlugin(alert);
 
-    // Mastodon comment system
-    site.remoteFile(
-      "/js/comments.js",
-      "https://unpkg.com/@oom/mastodon-comments@0.2.1/src/comments.js",
-    );
   };
 }
