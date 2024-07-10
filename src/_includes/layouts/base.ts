@@ -35,11 +35,15 @@ export default function (data: Lume.Data) {
         <link rel="stylesheet" href="/styles.css">
         <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="${data.metas?.site}">
         <link rel="alternate" href="/feed.json" type="application/json" title="${data.metas?.site}">
-        <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+        <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/wave.png">
         <link rel="canonical" href="${data.url}">
         <script src="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.28.0/feather.min.js"></script>
         <script src="/assets/js/components.js" type="module"></script>
         <script src="/assets/js/main.js" type="module"></script>
+        <!-- Include the CesiumJS JavaScript and CSS files -->
+        <script src="https://cesium.com/downloads/cesiumjs/releases/1.119/Build/Cesium/Cesium.js"></script>
+        <link href="https://cesium.com/downloads/cesiumjs/releases/1.119/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+  
       </head>
       <body>
         <div class="waves">
@@ -108,10 +112,10 @@ export default function (data: Lume.Data) {
           </svg>
         </div>
         <nav class="navbar">
-          <a href="/" class="navbar-home">
+          <div class="navbar-home">
               <img src="${data.metas?.image}" height="32" width="32"/>
               <span class="navbar-home-title">${data.metas?.site}</span>
-          </a>
+          </div>
 
           <ul class="navbar-links">
             ${menubar(data)}

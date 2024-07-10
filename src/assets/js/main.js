@@ -33,5 +33,8 @@ document.addEventListener('DOMContentLoaded', () => {
     images.forEach(image => {
       image.addEventListener('click', handleClick);
     });
+
+
+
 });
 

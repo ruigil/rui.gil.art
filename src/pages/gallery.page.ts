@@ -25,7 +25,7 @@ async function* processDirectory(name:string = "", curl:string = "/"):AsyncGener
 
   const files = new Map<string,boolean>(); 
  
-  const currentPath = "./src/media" + curl.substring(8)
+  const currentPath = "/home/rigel/rui.gil.art/media" + curl.substring(8)
 
   for await (const file of await listFiles(currentPath)) {
     files.set(file.name, file.isDirectory)

@@ -1,4 +1,4 @@
-class CardPhotoComponent extends HTMLElement {
+class CardPhotoTextComponent extends HTMLElement {
     constructor() {
         super();
         this.attachShadow({ mode: 'open' });
@@ -9,24 +9,23 @@ class CardPhotoComponent extends HTMLElement {
         this.addEventListeners();
         this.loadIcons();
     }
-    
+
     static get observedAttributes() {
-      return ['main-image', 'avatar-image'];
+      return ['text-message'];
     }
     
     attributeChangedCallback(name, oldValue, newValue) {
       if (this.shadowRoot) {
-          if (name === 'main-image') {
-              this.shadowRoot.querySelector('.card-image').src = newValue;
-          } else if (name === 'avatar-image') {
-              this.shadowRoot.querySelector('.avatar').src = newValue;
-          }
       }
     }
   
     render() {
-        const mainImage = this.getAttribute('main-image') || '/api/placeholder/300/200';
+        const mainImage = this.getAttribute('main-image');
+        const textMessage = this.getAttribute('text-message') || "";
         const avatarImage = this.getAttribute('avatar-image') || "/assets/img/user.svg";
+        const author = this.getAttribute('author') || "John Doe";
+        const time = this.getAttribute('time') || "000000";
+        const tags = this.getAttribute('tags') || "";
   
         const css = /*css*/`
                 :host {
@@ -136,18 +135,17 @@ class CardPhotoComponent extends HTMLElement {
                 <div class="card-header">
                     <img src="${avatarImage}" alt="Avatar" class="avatar">
                     <div class="author-info">
-                        <p class="author">John Doe</p>
-                        <p class="time">2 hours ago</p>
+                        <p class="author">${author}</p>
+                        <p class="time">${time}</p>
                     </div>
                 </div>
                 <div class="card-body">
-                    <img src="${mainImage}" alt="Card image" class="card-image">
-                    <p class="card-text">This is a great photo I took in Europe last summer. I hope you like it!</p>
+                    ${ mainImage ? `<img src='${mainImage}' alt="Card image" class="card-image">` : ``}
+                    <p class="card-text">${textMessage}</p>
                     <div class="card-footer">
                         <div class="tags-and-comments">
                             <div class="tags">
-                                <span class="tag">Web</span>
-                                <span class="tag">Component</span>
+                            ${ tags.split(',').map( e => `<span class="tag">${e}</span>`).join("") }
                             </div>
                             <button class="comment-button" aria-label="Toggle comments">
                                 <i data-feather="message-square"></i>
@@ -193,22 +191,124 @@ class StreamComponent extends HTMLElement {
         this.attachShadow({ mode: 'open' });
     }
   
-    connectedCallback() {
+    async loadPosts() {
+        const result = [];
+        const stream = await (await fetch("/posts/stream.json")).json();
+        for (const post of stream) {
+            const data = await (await fetch(`/posts/stream-${post.id}.json`)).json();
+            result.push(data);
+        }
+        return result;
+    }
+
+    async connectedCallback() {
+        this.posts = await this.loadPosts();
         this.render();
     }
 
     render() {
-        this.shadowRoot.innerHTML = /*html*/`
-            <card-photo
-                main-image="/media/Europe/europe.jpg"
-            ></card-photo>
-            <card-photo
-                main-image="/media/Europe/russia.jpg"
-            ></card-photo>
-    `;
+        console.log(this.posts);
+
+        const innerHTML = this.posts.map(post => {
+            return /*html*/`
+                <card-photo
+                    author="${post.author}"
+                    time="${post.time}"
+                    tags="${post.tags.map(tag => tag).join(',')}"
+                    ${post.image ? `main-image="${post.image}"` : ''}
+                    ${post.message ? `text-message="${post.message}"` : ''}	
+                ></card-photo>
+            `;
+        }).join('');
+
+        console.log(innerHTML)
+
+        this.shadowRoot.innerHTML = innerHTML;
+        
+        
     }
 }
 
-customElements.define('card-photo', CardPhotoComponent);
+class TagFilter extends HTMLElement {
+    constructor() {
+        super();
+        this.tags = ['JavaScript', 'HTML', 'CSS', 'React', 'Vue', 'Angular', 'Node.js', 'Python'];
+        this.selectedTags = [];
+        this.expanded = false;
+    }
+
+    connectedCallback() {
+        this.render();
+        this.addEventListeners();
+    }
+
+    render() {
+        this.innerHTML = `
+            <div class="tag-filter-title">
+                <svg class="icon chevron-down" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+                <svg class="icon chevron-up" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+                    <polyline points="18 15 12 9 6 15"></polyline>
+                </svg>
+                <h2 style="margin:0px;">Tag Filter</h2>    
+            </div>
+            <div class="tag-filter-content">
+                ${this.tags.map(tag => `<span class="tag" data-tag="${tag}">${tag}</span>`).join('')}
+            </div>
+        `;
+        feather.replace();
+    }
+
+    addEventListeners() {
+        this.iconElement = this.querySelector('.tag-filter-title-icon');
+        const title = this.querySelector('.tag-filter-title');
+        const content = this.querySelector('.tag-filter-content');
+        const tags = this.querySelectorAll('.tag');
+
+        title.addEventListener('click', () => {
+            this.expanded = !this.expanded;
+            content.classList.toggle('expanded');
+            this.updateIcon();
+        });
+
+        tags.forEach(tag => {
+            tag.addEventListener('click', () => {
+                const tagName = tag.getAttribute('data-tag');
+                if (this.selectedTags.includes(tagName)) {
+                    this.selectedTags = this.selectedTags.filter(t => t !== tagName);
+                    tag.classList.remove('selected');
+                } else {
+                    this.selectedTags.push(tagName);
+                    tag.classList.add('selected');
+                }
+                this.dispatchEvent(new CustomEvent('tagsChanged', { detail: this.selectedTags }));
+            });
+        });
+    }
+    
+    updateIcon() {
+        const chevronDown = this.querySelector('.chevron-down');
+        const chevronUp = this.querySelector('.chevron-up');
+        if (this.expanded) {
+            chevronDown.style.display = 'none';
+            chevronUp.style.display = 'inline-block';
+        } else {
+            chevronDown.style.display = 'inline-block';
+            chevronUp.style.display = 'none';
+        }
+    }
+}
+
+
+// Example usage
+const tagFilter = document.querySelector('tag-filter');
+tagFilter.addEventListener('tagsChanged', (event) => {
+    console.log('Selected tags:', event.detail);
+});
+
+
+customElements.define('tag-filter', TagFilter);
+customElements.define('card-photo', CardPhotoTextComponent);
 customElements.define('os-stream', StreamComponent);
 

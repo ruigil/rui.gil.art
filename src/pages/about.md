@@ -1,10 +1,10 @@
 ---
 layout: layouts/page.ts
-title: Connect
-url: /connect/
+title: About
+url: /about/
 menu:
   visible: true
-  order: 3
+  order: 4
 ---
 
-connect
+About me...
