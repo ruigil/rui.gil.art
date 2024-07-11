@@ -5,9 +5,9 @@ export const url = "/posts/"
 export const menu = { visible: true, order: 1 }
 
 
-export default (data:Lume.Data) => {
+export default () => {
   return /*html*/ `
     <tag-filter></tag-filter>
-    <os-stream></os-stream>
+    <os-posts></os-posts>
   `;
 }

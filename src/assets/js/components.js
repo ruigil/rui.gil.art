@@ -1,3 +1,28 @@
+function timeAgo(timestamp) {
+    const now = new Date();
+    const past = new Date(parseInt(timestamp));
+    const diffInSeconds = Math.floor((now - past) / 1000);
+
+    const units = [
+        { name: 'year', seconds: 31536000 },
+        { name: 'month', seconds: 2592000 },
+        { name: 'week', seconds: 604800 },
+        { name: 'day', seconds: 86400 },
+        { name: 'hour', seconds: 3600 },
+        { name: 'minute', seconds: 60 },
+        { name: 'second', seconds: 1 }
+    ];
+
+    for (const unit of units) {
+        const interval = Math.floor(diffInSeconds / unit.seconds);
+        if (interval >= 1) {
+            return interval === 1 ? `1 ${unit.name} ago` : `${interval} ${unit.name}s ago`;
+        }
+    }
+
+    return 'just now'; 
+}
+
 class CardPhotoTextComponent extends HTMLElement {
     constructor() {
         super();
@@ -136,7 +161,7 @@ class CardPhotoTextComponent extends HTMLElement {
                     <img src="${avatarImage}" alt="Avatar" class="avatar">
                     <div class="author-info">
                         <p class="author">${author}</p>
-                        <p class="time">${time}</p>
+                        <p class="time">${timeAgo(time)}</p>
                     </div>
                 </div>
                 <div class="card-body">
@@ -185,7 +210,7 @@ class CardPhotoTextComponent extends HTMLElement {
     }
 }
 
-class StreamComponent extends HTMLElement {
+class PostsComponent extends HTMLElement {
     constructor() {
         super();
         this.attachShadow({ mode: 'open' });
@@ -207,21 +232,18 @@ class StreamComponent extends HTMLElement {
     }
 
     render() {
-        console.log(this.posts);
-
         const innerHTML = this.posts.map(post => {
             return /*html*/`
                 <card-photo
                     author="${post.author}"
                     time="${post.time}"
                     tags="${post.tags.map(tag => tag).join(',')}"
+                    ${post.avatar ? `avatar-image="${post.avatar}"` : ''}
                     ${post.image ? `main-image="${post.image}"` : ''}
                     ${post.message ? `text-message="${post.message}"` : ''}	
                 ></card-photo>
             `;
         }).join('');
-
-        console.log(innerHTML)
 
         this.shadowRoot.innerHTML = innerHTML;
         
@@ -310,5 +332,5 @@ tagFilter.addEventListener('tagsChanged', (event) => {
 
 customElements.define('tag-filter', TagFilter);
 customElements.define('card-photo', CardPhotoTextComponent);
-customElements.define('os-stream', StreamComponent);
+customElements.define('os-posts', PostsComponent);
 
