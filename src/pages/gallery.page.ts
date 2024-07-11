@@ -8,8 +8,8 @@ const folderContent = (name:string,curl:string) => {
   return /*html*/ `
     <div class="responsive">
       <div class="gallery">
-        <a href="${curl.toLowerCase() + name.toLowerCase()}">
-          <img src="/media${curl.substring(8) + name}/${name.toLowerCase()}.jpg" alt="${name}">
+        <a href="${curl.toLowerCase() + name}">
+          <img src="/media/gallery/${curl.substring(8) + name}/${name.toLowerCase()}.jpg" alt="${name}">
         </a>
         <div class="desc">${name}</div>
       </div>
@@ -18,14 +18,14 @@ const folderContent = (name:string,curl:string) => {
 }
 
 const photoContent = ( name:string, curl:string) => {
-  return `<img class="image-thumb" src="../../media${curl.substring(8)}${name}" alt="Photo">`
+  return `<img class="image-thumb" src="/media/gallery${curl.substring(8)}${name}" alt="Photo">`
 }
 
 async function* processDirectory(name:string = "", curl:string = "/"):AsyncGenerator {
 
   const files = new Map<string,boolean>(); 
  
-  const currentPath = "/home/rigel/rui.gil.art/media" + curl.substring(8)
+  const currentPath = "./media/gallery" + curl.substring(8)
 
   for await (const file of await listFiles(currentPath)) {
     files.set(file.name, file.isDirectory)
