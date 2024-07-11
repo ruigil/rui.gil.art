@@ -193,9 +193,9 @@ class StreamComponent extends HTMLElement {
   
     async loadPosts() {
         const result = [];
-        const stream = await (await fetch("/posts/stream.json")).json();
+        const stream = await (await fetch("/messages/messages.json")).json();
         for (const post of stream) {
-            const data = await (await fetch(`/posts/stream-${post.id}.json`)).json();
+            const data = await (await fetch(`/messages/message-${post.id}.json`)).json();
             result.push(data);
         }
         return result;

@@ -1,7 +1,7 @@
 
 export const layout = "layouts/page.ts"
-export const title = "Stream"
-export const url = "/stream/"
+export const title = "Posts"
+export const url = "/posts/"
 export const menu = { visible: true, order: 1 }
 
 

@@ -5,7 +5,7 @@ export default (data:Lume.Data) => {
  <html xmlns="http://www.w3.org/1999/xhtml">    
   <head>      
     <title>OceanOS Blog</title>      
-    <meta http-equiv="refresh" content="0;URL='/stream/'" />    
+    <meta http-equiv="refresh" content="0;URL='/posts/'" />    
   </head>    
   <body> 
     <p>Redirect to stream...</p> 

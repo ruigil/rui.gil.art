@@ -1,5 +1,6 @@
 site
 media/
-posts/
+messages/
 signal-cli-rest-api/
 deno.lock
+.env
