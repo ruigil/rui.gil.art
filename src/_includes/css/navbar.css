@@ -9,7 +9,7 @@
   justify-content: space-between;
   padding: 1rem min(5vw, 5rem);
   align-items: center;
-  color: var(--color-base-inv)
+  color: var(--color-background)
 }
 
 .navbar-links {
@@ -22,7 +22,7 @@
   font: var(--font-ui-bold);
   align-items: center;
   & [aria-current="page"] {
-    border-bottom: 2px solid var(--color-base-inv);
+    border-bottom: 2px solid var(--color-background);
   }
 
 }
@@ -30,7 +30,7 @@
 .navbar-links a {
   text-decoration: none;
   font-weight: bold;
-  color: var(--color-base-inv);
+  color: var(--color-background);
 }
 
 .navbar-search {

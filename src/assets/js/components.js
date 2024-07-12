@@ -32,7 +32,6 @@ class CardPhotoTextComponent extends HTMLElement {
     connectedCallback() {
         this.render();
         this.addEventListeners();
-        this.loadIcons();
     }
 
     static get observedAttributes() {
@@ -46,7 +45,7 @@ class CardPhotoTextComponent extends HTMLElement {
   
     render() {
         const mainImage = this.getAttribute('main-image');
-        const textMessage = this.getAttribute('text-message') || "";
+        const textMessage = this.getAttribute('text-message');
         const avatarImage = this.getAttribute('avatar-image') || "/assets/img/user.svg";
         const author = this.getAttribute('author') || "John Doe";
         const time = this.getAttribute('time') || "000000";
@@ -77,7 +76,6 @@ class CardPhotoTextComponent extends HTMLElement {
                     background-color: var(--color-text);
                 }
                 .author-info {
-                    flex-grow: 1;
                 }
                 .author {
                     font-weight: bold;
@@ -108,49 +106,21 @@ class CardPhotoTextComponent extends HTMLElement {
                     padding: 10px;
                     background-color: var(--color-highlight);
                 }
-                .tags-and-comments {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                }
                 .tags {
                     display: flex;
                     flex-wrap: wrap;
+                    align-items: center;
+                    flex-grow: 1;
+                    padding: 0 10px;
                 }
                 .tag {
                     display: inline-block;
-                    background-color: var(--color-base-inv);
+                    background-color: var(--color-background);
                     padding: 2px 8px;
                     border-radius: 10px;
                     font-size: 0.8em;
                     margin-right: 5px;
                     margin-bottom: 5px;
-                }
-                .comment-button {
-                    background: none;
-                    border: none;
-                    cursor: pointer;
-                    padding: 0;
-                }
-                .comment-button svg {
-                    width: 24px;
-                    height: 24px;
-                }
-                .comments-section {
-                    max-height: 0;
-                    overflow: hidden;
-                    transition: max-height 0.3s ease-out;
-                    background-color: var(--color-highlight);
-                }
-                .comments-section.expanded {
-                    max-height: 500px;
-                }
-                .comment {
-                    padding: 10px;
-                    border-bottom: 1px solid #e0e0e0;
-                }
-                .comment:last-child {
-                    border-bottom: none;
                 }
         `
   
@@ -163,51 +133,21 @@ class CardPhotoTextComponent extends HTMLElement {
                         <p class="author">${author}</p>
                         <p class="time">${timeAgo(time)}</p>
                     </div>
+                    <div class="tags">
+                        ${ tags.split(',').map( e => `<span class="tag">${e}</span>`).join("") }
+                    </div>
                 </div>
                 <div class="card-body">
+                    ${ textMessage ? `<p class="card-text">${textMessage}</p>` : ``}
                     ${ mainImage ? `<img src='${mainImage}' alt="Card image" class="card-image">` : ``}
-                    <p class="card-text">${textMessage}</p>
-                    <div class="card-footer">
-                        <div class="tags-and-comments">
-                            <div class="tags">
-                            ${ tags.split(',').map( e => `<span class="tag">${e}</span>`).join("") }
-                            </div>
-                            <button class="comment-button" aria-label="Toggle comments">
-                                <i data-feather="message-square"></i>
-                            </button>
-                        </div>
-                    </div>
-                <div class="comments-section">
-                    <div class="comment">
-                        <p><strong>Alice:</strong> Great component! I love the design.</p>
-                    </div>
-                    <div class="comment">
-                        <p><strong>Bob:</strong> How can I customize the colors?</p>
-                    </div>
-                    <div class="comment">
-                        <p><strong>Charlie:</strong> This is exactly what I was looking for. Thanks!</p>
-                    </div>
-                </div>
                 </div>
             </div>
         `;
     }
   
     addEventListeners() {
-        const commentButton = this.shadowRoot.querySelector('.comment-button');
-        const commentsSection = this.shadowRoot.querySelector('.comments-section');
-  
-        commentButton.addEventListener('click', () => {
-            commentsSection.classList.toggle('expanded');
-        });
     }
   
-    loadIcons() {
-        // This is a workaround to use Feather Icons within the shadow DOM
-        const iconElement = this.shadowRoot.querySelector('i[data-feather]');
-        const svgContent = feather.icons['message-square'].toSvg();
-        iconElement.outerHTML = svgContent;
-    }
 }
 
 class PostsComponent extends HTMLElement {
@@ -279,7 +219,6 @@ class TagFilter extends HTMLElement {
                 ${this.tags.map(tag => `<span class="tag" data-tag="${tag}">${tag}</span>`).join('')}
             </div>
         `;
-        feather.replace();
     }
 
     addEventListeners() {
@@ -324,10 +263,12 @@ class TagFilter extends HTMLElement {
 
 
 // Example usage
+/*
 const tagFilter = document.querySelector('tag-filter');
 tagFilter.addEventListener('tagsChanged', (event) => {
     console.log('Selected tags:', event.detail);
 });
+*/
 
 
 customElements.define('tag-filter', TagFilter);

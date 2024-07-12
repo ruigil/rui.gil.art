@@ -1,9 +1,5 @@
 .page-header {
-  margin-bottom: var(--row-gap-medium);
 
-  & > p:first-child {
-    margin-top: 0;
-  }
 }
 
 .page-title {

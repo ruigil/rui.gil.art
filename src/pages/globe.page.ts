@@ -8,6 +8,10 @@ export const menu = { visible: true, order: 3 }
 export default (data:Lume.Data) => {
   return /*html*/ `
     <div id="cesiumContainer" class="body-position"></div>
+  <!-- Include the CesiumJS JavaScript and CSS files -->
+
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.119/Build/Cesium/Cesium.js"></script>
+
   <script type="module">
     // Your access token can be found at: https://ion.cesium.com/tokens.
     // This is the default access token from your ion account

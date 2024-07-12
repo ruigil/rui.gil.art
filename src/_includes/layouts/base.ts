@@ -37,69 +37,66 @@ export default function (data: Lume.Data) {
         <link rel="alternate" href="/feed.json" type="application/json" title="${data.metas?.site}">
         <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/wave.png">
         <link rel="canonical" href="${data.url}">
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.28.0/feather.min.js"></script>
+        <link href="https://cesium.com/downloads/cesiumjs/releases/1.119/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
         <script src="/assets/js/components.js" type="module"></script>
         <script src="/assets/js/main.js" type="module"></script>
-        <!-- Include the CesiumJS JavaScript and CSS files -->
-        <script src="https://cesium.com/downloads/cesiumjs/releases/1.119/Build/Cesium/Cesium.js"></script>
-        <link href="https://cesium.com/downloads/cesiumjs/releases/1.119/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
-  
+
       </head>
       <body>
         <div class="waves">
-          <svg width="100%" height="200px" fill="none" viewBox="0 0 2048 200">
+          <svg width="100%" height="140px" fill="none" viewBox="0 0 1024 50">
             <g>
               <path
                 class="wave-color"
                 d="
-                  M 0 77 
-                  C 273,183
+                  M 0 27 
+                  C 273,50
                     822,-40
-                    2048,77 
+                    1024,20 
 
                   V -700 
                   H 0 
-                  V 77 
+                  V 27 
                   Z">
                 <animate  
                   repeatCount="indefinite" 
                   attributeName="d" 
                   dur="15s" 
                   values="
-                  M0 57 
-                  c 473,283
-                    822,-40
-                    2048,57 
+                  M 0 27 
+                  C 273,50
+                    822,-20
+                    1024,20 
 
                   V -700 
                   H 0 
-                  V 57 
+                  V 27 
                   Z; 
 
-                  M0 90 
-                  c 473,-40
-                    1222,283
-                    2048,90 
+                  M0 40 
+                  c 473,-20
+                    322,18
+                    1024,30 
 
                   V -700 
                   H 0 
                   V 90 
                   Z; 
 
-                  M0 77 
-                  c 973,260
-                    1722,-53
-                    2048,77 
+                  M0 17 
+                  c 373,40
+                    622,-13
+                    1024,17 
 
                   V -700
                   H 0 
                   V 77 
                   Z; 
 
-                  M0 57 
-                  c 473,283
-                    822,-40
-                    2048,57 
+                  M 0 27 
+                  C 273,50
+                    822,-20
+                    1024,20 
 
                   V -700 
                   H 0 
