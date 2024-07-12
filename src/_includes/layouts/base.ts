@@ -17,7 +17,9 @@ const menubar = (data: Lume.Data) => {
   return menu;
 }
 
+/*
 
+*/
 export default function (data: Lume.Data) {
   return /*html*/ `
     <!doctype html>
@@ -43,71 +45,50 @@ export default function (data: Lume.Data) {
 
       </head>
       <body>
-        <div class="waves">
-          <svg width="100%" height="140px" fill="none" viewBox="0 0 1024 50">
-            <g>
-              <path
-                class="wave-color"
-                d="
-                  M 0 27 
-                  C 273,50
-                    822,-40
-                    1024,20 
+    <div class="wave-container">
+        <svg class="wave-svg" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" viewBox="0 0 300 100">
+            <defs>
+                <linearGradient id="blueGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style="stop-color:var(--color-contrast)"/>
+                    <stop offset="100%" style="stop-color:var(--color-background)"/>
+                </linearGradient>
+                <linearGradient id="orangeGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style="stop-color:var(--color-highlight)"/>
+                    <stop offset="100%" style="stop-color:var(--color-background)"/>
+                </linearGradient>
+                <clipPath id="waveClip">
+                    <path d="M-10,50 Q75,20 150,50 T300,50 V100 H0 Z">
+                        <animate
+                            attributeName="d"
+                            values="
+                                M-10,50 Q75,20 150,50 T300,50 V100 H0 Z;
+                                M-10,50 Q75,80 150,50 T300,50 V100 H0 Z;
+                                M-10,50 Q75,20 150,50 T300,50 V100 H0 Z
+                            "
+                            dur="15s"
+                            repeatCount="indefinite"
+                        />
+                    </path>
+                </clipPath>
+            </defs>
 
-                  V -700 
-                  H 0 
-                  V 27 
-                  Z">
-                <animate  
-                  repeatCount="indefinite" 
-                  attributeName="d" 
-                  dur="15s" 
-                  values="
-                  M 0 27 
-                  C 273,50
-                    822,-20
-                    1024,20 
+            <rect x="0" y="0" width="300" height="100" fill="url(#blueGradient)" />
+            <rect x="0" y="0" width="300" height="100" fill="url(#orangeGradient)" clip-path="url(#waveClip)" />
 
-                  V -700 
-                  H 0 
-                  V 27 
-                  Z; 
-
-                  M0 40 
-                  c 473,-20
-                    322,18
-                    1024,30 
-
-                  V -700 
-                  H 0 
-                  V 90 
-                  Z; 
-
-                  M0 17 
-                  c 373,40
-                    622,-13
-                    1024,17 
-
-                  V -700
-                  H 0 
-                  V 77 
-                  Z; 
-
-                  M 0 27 
-                  C 273,50
-                    822,-20
-                    1024,20 
-
-                  V -700 
-                  H 0 
-                  V 57 
-                  Z
-                  ">
-                </animate> 
-              </path>
-            </g>
-          </svg>
-        </div>
+            <path d="M-10,50 Q75,20 150,50 T310,50" fill="none" stroke="var(--color-highlight)" stroke-width="8">
+                <animate
+                    attributeName="d"
+                    values="
+                        M-10,50 Q75,20 150,50 T310,50;
+                        M-10,50 Q75,80 150,50 T310,50;
+                        M-10,50 Q75,20 150,50 T310,50
+                    "
+                    dur="15s"
+                    repeatCount="indefinite"
+                />
+            </path>
+        </svg>
+    </div>
         <nav class="navbar">
           <div class="navbar-home">
               <img src="${data.metas?.image}" height="32" width="32"/>

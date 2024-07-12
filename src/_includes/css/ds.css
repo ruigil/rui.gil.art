@@ -472,6 +472,7 @@ button[role=switch][aria-checked=true]:before {
     --color-link: var(--color-primary);
     --color-link-hover: var(--color-primary-highlight);
     --color-contrast: #0d192e;
+    --color-contrast-highlight: #16243d;
 
     --color-line: #e0e4eb;
     --color-background: #ffdda3;
@@ -520,6 +521,8 @@ button[role=switch][aria-checked=true]:before {
     --color-background: #0d192e;
     --color-highlight: #16243d;
     --color-contrast: #ffdda3;
+    --color-contrast-highlight: #dec190;
+
     --color-primary: #f45757;
     --color-primary-highlight: #f66f6f;
     --code-text: var(--color-base);

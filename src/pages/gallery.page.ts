@@ -8,7 +8,7 @@ const folderContent = (name:string,curl:string) => {
   return /*html*/ `
     <div class="responsive">
       <div class="gallery">
-        <a href="${curl.toLowerCase() + name}">
+        <a href="${curl + name}">
           <img src="/media/gallery/${curl.substring(8) + name}/${name.toLowerCase()}.jpg" alt="${name}">
         </a>
         <div class="desc">${name}</div>
@@ -53,7 +53,7 @@ async function* processDirectory(name:string = "", curl:string = "/"):AsyncGener
       <div class="column">${columns[3]}</div>
     </div>`
 
-  const back = curl === "/gallery/" ? `` : `<a href=".."><i class="arrow left"></i>Back</a>`
+  const back = curl === "/gallery/" ? `` : `<a href=".."><i class="arrow left"></i><h3 style="display: inline;padding-left:10px; ">Back</h3></a>`
   const modal = /*html*/`
     <div id="myModal" class="modal">
       <div >

@@ -1,7 +1,7 @@
 div.gallery {
     margin-top: 15px;
-    background-color: var(--color-background-inv);
-    color: var(--color-base-inv);
+    background-color: var(--color-contrast);
+    color: var(--color-background);
     border-radius: 5px;
   }
   
@@ -52,6 +52,7 @@ div.gallery {
     display: flex;
     flex-wrap: wrap;
     padding: 0 4px;
+    margin-top: 20px;
   }
   
   /* Create four equal columns that sits next to each other */
