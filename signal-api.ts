@@ -18,13 +18,18 @@ const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "
 
 for (const message of messages) {
     console.log(message)
-    console.log(message.envelope.syncMessage?.sentMessage?.attachments)
     if (message.envelope.syncMessage?.sentMessage?.groupInfo?.groupId === oceanosGroupId) {
         console.log("OceanOS group found")
 
         // Check if message is a delete message
         if (message.envelope.syncMessage.sentMessage.remoteDelete) {
-            console.log(`Message ${message.envelope.syncMessage.sentMessage.remoteDelete.timestamp} deleted`)
+            const id = message.envelope.syncMessage.sentMessage.remoteDelete.timestamp;
+            await Deno.remove(`./messages/message-${id}.json`)
+            const indexToRemove = posts.findIndex((item:any) => item.id === id );
+            if (indexToRemove !== -1) {
+                posts.splice(indexToRemove, 1);
+            }
+            console.log(`Message ${id} deleted`)
         } else {
             const date = new Date(message.envelope.syncMessage.sentMessage.timestamp)
             const post = {
@@ -57,9 +62,6 @@ for (const message of messages) {
             await Deno.writeTextFile(`./messages/message-${post.time}.json`, JSON.stringify(post, null, 4))
    
         }
-    } else if (message.envelope.syncMessage) {
-        // a sync message without a sent message is interpreted as a profile config message.
-        // so we copy the profile avatar to the profile folder
     }
 }
 
