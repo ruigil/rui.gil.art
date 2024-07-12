@@ -1,4 +1,5 @@
 import { config } from "https://deno.land/x/dotenv/mod.ts";
+import { test } from "lume/deps/front_matter.ts";
 
 // Load environment variables
 const env = config();
@@ -42,8 +43,13 @@ for (const message of messages) {
             post.tags.push(date.getFullYear())
             post.tags.push( months[date.getMonth()] )
 
-            const text = message.envelope.syncMessage.sentMessage.message
+            let text = message.envelope.syncMessage.sentMessage.message
             if (text) {
+                const userTags = text.match(/#\w+/g).map((tag:string) => tag.slice(1).toUpperCase())
+                if (userTags) {
+                    post.tags.push(...userTags)
+                }
+                text = text.replace(/#\w+/g, "")
                 Object.assign(post,{ message: text });
                 post.tags.push("TEXT")
             }
