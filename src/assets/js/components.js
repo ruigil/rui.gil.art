@@ -52,10 +52,6 @@ class CardPhotoTextComponent extends HTMLElement {
         const tags = this.getAttribute('tags') || "";
   
         const css = /*css*/`
-                :host {
-                    display: block;
-                    font-family: Arial, sans-serif;
-                }
                 .card {
                     border-radius: 5px;
                     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
@@ -138,7 +134,7 @@ class CardPhotoTextComponent extends HTMLElement {
                     </div>
                 </div>
                 <div class="card-body">
-                    ${ textMessage ? `<p class="card-text">${textMessage}</p>` : ``}
+                    ${ textMessage && textMessage.trim() !== "" ? `<p class="card-text">${textMessage}</p>` : ``}
                     ${ mainImage ? `<img src='${mainImage}' alt="Card image" class="card-image">` : ``}
                 </div>
             </div>
@@ -149,6 +145,196 @@ class CardPhotoTextComponent extends HTMLElement {
     }
   
 }
+
+class VideoPlayerComponent extends HTMLElement {
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+    }
+
+    connectedCallback() {
+        this.render();
+        this.setupEventListeners();
+    }
+
+    render() {
+        const mainVideo = this.getAttribute('main-video');
+        const textMessage = this.getAttribute('text-message');
+        const avatarImage = this.getAttribute('avatar-image') || "/assets/img/user.svg";
+        const author = this.getAttribute('author') || "John Doe";
+        const time = this.getAttribute('time') || "0";
+        const tags = this.getAttribute('tags') || "";
+        this.shadowRoot.innerHTML = `
+        <style>
+                        .card {
+                    border-radius: 5px;
+                    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+                    overflow: hidden;
+                    margin: 20px auto;
+                }
+                .card-header {
+                    display: flex;
+                    align-items: center;
+                    padding: 10px;
+                    background-color: var(--color-highlight);
+                }
+                .avatar {
+                    width: 40px;
+                    height: 40px;
+                    border-radius: 50%;
+                    margin-right: 10px;
+                    background-color: var(--color-text);
+                }
+                .author-info {
+                }
+                .author {
+                    font-weight: bold;
+                    color: var(--color-text);
+                    margin: 0;
+                }
+                .time {
+                    font-size: 0.8em;
+                    color: #666;
+                    margin: 0;
+                }
+                .card-body {
+                    display: flex;
+                    flex-direction: column;
+                }
+                .card-image {
+                    width: 100%;
+                    margin:0;
+                    padding:0;
+                }
+                .card-text {
+                    margin:0px;
+                    padding: 10px;
+                    background-color: var(--color-highlight);
+                }
+                .card-footer {
+                    margin:0px;
+                    padding: 10px;
+                    background-color: var(--color-highlight);
+                }
+                .tags {
+                    display: flex;
+                    flex-wrap: wrap;
+                    align-items: center;
+                    flex-grow: 1;
+                    padding: 0 10px;
+                }
+                .tag {
+                    display: inline-block;
+                    background-color: var(--color-background);
+                    padding: 2px 8px;
+                    border-radius: 10px;
+                    font-size: 0.8em;
+                    margin-right: 5px;
+                    margin-bottom: 5px;
+                }
+
+            #video-container {
+            width: 100%;
+            position: relative;
+            }
+            video {
+            width: 100%;
+            display: block;
+            }
+            #controls {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            }
+            #play-pause {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            margin-right: 10px;
+            }
+            #time-bar {
+            flex-grow: 1;
+            height: 5px;
+            background-color: #ddd;
+            cursor: pointer;
+            }
+            #progress {
+            height: 100%;
+            background-color: #3498db;
+            width: 0%;
+            }
+        </style>
+        <div class="card">
+            <div class="card-header">
+                <img src="${avatarImage}" alt="Avatar" class="avatar">
+                <div class="author-info">
+                    <p class="author">${author}</p>
+                    <p class="time">${timeAgo(time)}</p>
+                </div>
+                <div class="tags">
+                    ${ tags.split(',').map( e => `<span class="tag">${e}</span>`).join("") }
+                </div>
+            </div>
+            <div class="card-body">
+                ${ textMessage && textMessage.trim() !== "" ? `<p class="card-text">${textMessage}</p>` : ``}
+                <div id="video-container">
+                    <video>
+                    <source src="${mainVideo}" type="video/mp4">
+                    Your browser does not support the video tag.
+                    </video>
+                    <div id="controls">
+                    <button id="play-pause">▶️</button>
+                    <div id="time-bar">
+                        <div id="progress"></div>
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        `;
+    }
+
+    setupEventListeners() {
+        const video = this.shadowRoot.querySelector('video');
+        const playPauseButton = this.shadowRoot.querySelector('#play-pause');
+        const timeBar = this.shadowRoot.querySelector('#time-bar');
+        const progress = this.shadowRoot.querySelector('#progress');
+
+        playPauseButton.addEventListener('click', () => this.togglePlayPause());
+        video.addEventListener('timeupdate', () => this.updateProgress());
+        timeBar.addEventListener('click', (e) => this.seek(e));
+    }
+
+    togglePlayPause() {
+        const video = this.shadowRoot.querySelector('video');
+        const playPauseButton = this.shadowRoot.querySelector('#play-pause');
+        
+        if (video.paused) {
+        video.play();
+        playPauseButton.textContent = '⏸️';
+        } else {
+        video.pause();
+        playPauseButton.textContent = '▶️';
+        }
+    }
+
+    updateProgress() {
+        const video = this.shadowRoot.querySelector('video');
+        const progress = this.shadowRoot.querySelector('#progress');
+        const value = (video.currentTime / video.duration) * 100;
+        progress.style.width = value + '%';
+    }
+
+    seek(event) {
+        const video = this.shadowRoot.querySelector('video');
+        const timeBar = this.shadowRoot.querySelector('#time-bar');
+        const percent = event.offsetX / timeBar.offsetWidth;
+        video.currentTime = percent * video.duration;
+    }
+}
+  
 
 class PostsComponent extends HTMLElement {
     constructor() {
@@ -243,8 +429,10 @@ class PostsComponent extends HTMLElement {
             ${Array.from(this.tags) .map(tag => `<span class="tag ${ this.selectedTags.includes(tag)? 'selected' : ''}" data-tag="${tag}">${tag}</span>`).join('')}
         </div>`
 
+
         const innerHTML = this.posts.map(post => {
-            return /*html*/`
+            if (post.tags.includes("PHOTO")) 
+                return /*html*/`
                 <card-photo
                     author="${post.author}"
                     time="${post.time}"
@@ -254,6 +442,18 @@ class PostsComponent extends HTMLElement {
                     ${post.message ? `text-message="${post.message}"` : ''}	
                 ></card-photo>
             `;
+            else if (post.tags.includes("VIDEO")) {
+                return /*html*/`
+                <video-player
+                    author="${post.author}"
+                    time="${post.time}"
+                    tags="${post.tags.map(tag => tag).join(',')}"
+                    ${post.avatar ? `avatar-image="${post.avatar}"` : ''}
+                    ${post.video ? `main-video="${post.video}"` : ''}
+                    ${post.message ? `text-message="${post.message}"` : ''} 
+                ></video-player>
+            `;
+            }
         }).join('');
 
         this.innerHTML = tagFilter + innerHTML;
@@ -293,8 +493,8 @@ class PostsComponent extends HTMLElement {
                 });
                 this.posts = await this.loadPosts(pids);
                 this.render();
-                this.addEventListeners();
                 this.dispatchEvent(new CustomEvent('tagsChanged', { detail: this.selectedTags }));
+                this.addEventListeners();
             });
         });
     }
@@ -324,4 +524,5 @@ tagFilter.addEventListener('tagsChanged', (event) => {
 
 customElements.define('card-photo', CardPhotoTextComponent);
 customElements.define('os-posts', PostsComponent);
+customElements.define('video-player', VideoPlayerComponent);
 
