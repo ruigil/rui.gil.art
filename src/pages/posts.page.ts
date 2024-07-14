@@ -7,8 +7,5 @@ export const tagFilter = true
 
 
 export default () => {
-  return /*html*/ `
-    <tag-filter></tag-filter>
-    <os-posts></os-posts>
-  `;
+  return `<os-posts></os-posts>`;
 }

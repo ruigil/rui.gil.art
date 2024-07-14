@@ -48,7 +48,7 @@ class CardPhotoTextComponent extends HTMLElement {
         const textMessage = this.getAttribute('text-message');
         const avatarImage = this.getAttribute('avatar-image') || "/assets/img/user.svg";
         const author = this.getAttribute('author') || "John Doe";
-        const time = this.getAttribute('time') || "000000";
+        const time = this.getAttribute('time') || "0";
         const tags = this.getAttribute('tags') || "";
   
         const css = /*css*/`
@@ -153,25 +153,96 @@ class CardPhotoTextComponent extends HTMLElement {
 class PostsComponent extends HTMLElement {
     constructor() {
         super();
-        this.attachShadow({ mode: 'open' });
+        this.tags = new Set();
+        this.selectedTags = [];
+        this.expanded = false;
+    }
+
+    async loadPostsIds() {
+        return await (await fetch("/messages/messages.json")).json();
     }
   
-    async loadPosts() {
+    async loadPosts(ids) {
         const result = [];
-        const stream = await (await fetch("/messages/messages.json")).json();
-        for (const post of stream) {
+        for (const post of ids) {
             const data = await (await fetch(`/messages/message-${post.id}.json`)).json();
             result.push(data);
+            data.tags.forEach(tag => this.tags.add(tag));
         }
         return result;
     }
 
     async connectedCallback() {
-        this.posts = await this.loadPosts();
+        this.postsIds = await this.loadPostsIds();
+        this.posts = await this.loadPosts(this.postsIds);
         this.render();
+        this.addEventListeners();
     }
 
     render() {
+        const css = /*css*/`
+        tag-filter {
+            display: block;
+            font-family: Arial, sans-serif;
+            margin-bottom: 10px;
+            width: 100%;
+        }
+        .tag-filter-title {
+            border-radius: 5px;
+            background-color: var(--color-highlight);
+            padding: 10px;
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            justify-items: center;
+            gap: 4px;
+        }
+        .tag-filter-content {
+            background-color: var(--color-highlight);
+            padding: 10px;
+            display: none;
+            border-bottom-left-radius: 5px;
+            border-bottom-right-radius: 5px;
+        }
+        .tag-filter-content.expanded {
+            display: block;
+        }
+
+        .tag {
+            display: inline-block;
+            background-color: var(--color-background);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.8em;
+            margin-right: 5px;
+            margin-bottom: 5px;
+            cursor: pointer;
+        }
+
+        .tag.selected {
+            background-color: var(--color-contrast);
+            color: var(--color-background);
+        }
+        .tag.invisible {
+            display: none;
+        }
+        `
+        const tagFilter = /*html*/`
+        <style>${css}</style>
+        <div class="tag-filter-title">
+            <svg class="icon chevron-down" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+            <svg class="icon chevron-up" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+                <polyline points="18 15 12 9 6 15"></polyline>
+            </svg>
+            <h2 style="margin:0px;">Tag Filter</h2>    
+        </div>
+        <div class="tag-filter-content ${this.expanded ? 'expanded' : ''}">
+            ${Array.from(this.tags) .map(tag => `<span class="tag ${ this.selectedTags.includes(tag)? 'selected' : ''}" data-tag="${tag}">${tag}</span>`).join('')}
+        </div>`
+
         const innerHTML = this.posts.map(post => {
             return /*html*/`
                 <card-photo
@@ -185,44 +256,12 @@ class PostsComponent extends HTMLElement {
             `;
         }).join('');
 
-        this.shadowRoot.innerHTML = innerHTML;
+        this.innerHTML = tagFilter + innerHTML;
         
         
-    }
-}
-
-class TagFilter extends HTMLElement {
-    constructor() {
-        super();
-        this.tags = ['JavaScript', 'HTML', 'CSS', 'React', 'Vue', 'Angular', 'Node.js', 'Python'];
-        this.selectedTags = [];
-        this.expanded = false;
-    }
-
-    connectedCallback() {
-        this.render();
-        this.addEventListeners();
-    }
-
-    render() {
-        this.innerHTML = `
-            <div class="tag-filter-title">
-                <svg class="icon chevron-down" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="6 9 12 15 18 9"></polyline>
-                </svg>
-                <svg class="icon chevron-up" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
-                    <polyline points="18 15 12 9 6 15"></polyline>
-                </svg>
-                <h2 style="margin:0px;">Tag Filter</h2>    
-            </div>
-            <div class="tag-filter-content">
-                ${this.tags.map(tag => `<span class="tag" data-tag="${tag}">${tag}</span>`).join('')}
-            </div>
-        `;
     }
 
     addEventListeners() {
-        this.iconElement = this.querySelector('.tag-filter-title-icon');
         const title = this.querySelector('.tag-filter-title');
         const content = this.querySelector('.tag-filter-content');
         const tags = this.querySelectorAll('.tag');
@@ -234,7 +273,7 @@ class TagFilter extends HTMLElement {
         });
 
         tags.forEach(tag => {
-            tag.addEventListener('click', () => {
+            tag.addEventListener('click', async () => {
                 const tagName = tag.getAttribute('data-tag');
                 if (this.selectedTags.includes(tagName)) {
                     this.selectedTags = this.selectedTags.filter(t => t !== tagName);
@@ -243,6 +282,18 @@ class TagFilter extends HTMLElement {
                     this.selectedTags.push(tagName);
                     tag.classList.add('selected');
                 }
+                this.tags.clear();
+                const pids = [];
+                console.log(this.selectedTags);
+                this.postsIds.forEach(post => {
+                    if (this.selectedTags.every(tag => post.tags.includes(tag))) {
+                        post.tags.forEach(tag => this.tags.add(tag));
+                        pids.push(post);
+                    }
+                });
+                this.posts = await this.loadPosts(pids);
+                this.render();
+                this.addEventListeners();
                 this.dispatchEvent(new CustomEvent('tagsChanged', { detail: this.selectedTags }));
             });
         });
@@ -259,8 +310,8 @@ class TagFilter extends HTMLElement {
             chevronUp.style.display = 'none';
         }
     }
-}
 
+}
 
 // Example usage
 /*
@@ -271,7 +322,6 @@ tagFilter.addEventListener('tagsChanged', (event) => {
 */
 
 
-customElements.define('tag-filter', TagFilter);
 customElements.define('card-photo', CardPhotoTextComponent);
 customElements.define('os-posts', PostsComponent);
 
