@@ -55,10 +55,16 @@ for (const message of messages) {
                 post.tags.push("TEXT")
             }
             
-            const image = message.envelope.syncMessage.sentMessage.attachments
-            if (image) {
-                Object.assign(post,{ image: `/media/signal/attachments/${image[0].id}` });
-                post.tags.push("PHOTO")
+            const media = message.envelope.syncMessage.sentMessage.attachments
+            if (media) {
+                console.log(media)
+                if (media[0].contentType === "image/jpeg") {
+                    Object.assign(post,{ image: `/media/signal/attachments/${media[0].id}` });
+                    post.tags.push("PHOTO")
+                } else if (media[0].contentType === "video/mp4") {
+                    Object.assign(post,{ video: `/media/signal/attachments/${media[0].id}` });
+                    post.tags.push("VIDEO")
+                }
             }
     
             posts.unshift({
