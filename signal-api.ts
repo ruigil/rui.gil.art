@@ -40,14 +40,15 @@ for (const message of messages) {
                 tags: <any>[]
             }
 
-            post.tags.push(date.getFullYear())
+            post.tags.push(date.getFullYear() + "")
             post.tags.push( months[date.getMonth()] )
 
             let text = message.envelope.syncMessage.sentMessage.message
             if (text) {
-                const userTags = text.match(/#\w+/g).map((tag:string) => tag.slice(1).toUpperCase())
+                const userTags = text.match(/#\w+/g);
                 if (userTags) {
-                    post.tags.push(...userTags)
+                    // remove the hasthag and convert to uppercase
+                    post.tags.push(...userTags.map((tag:string) => tag.slice(1).toUpperCase()))
                 }
                 text = text.replace(/#\w+/g, "")
                 Object.assign(post,{ message: text });
