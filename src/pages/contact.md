@@ -1,7 +1,7 @@
 ---
 layout: layouts/page.ts
-title: About
-url: /about/
+title: Contact
+url: /contact/
 menu:
   visible: true
   order: 4
