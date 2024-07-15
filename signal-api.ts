@@ -16,11 +16,14 @@ const messages = await(await fetch(apiUrl)).json()
 const posts = JSON.parse(await Deno.readTextFile('./messages/messages.json'))
 const nPosts = posts.length
 const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"]
+let update = false;
+
 
 for (const message of messages) {
     console.log(message)
     if (message.envelope.syncMessage?.sentMessage?.groupInfo?.groupId === oceanosGroupId) {
         console.log("OceanOS group found")
+        update = true;
 
         // Check if message is a delete message
         if (message.envelope.syncMessage.sentMessage.remoteDelete) {
@@ -58,12 +61,23 @@ for (const message of messages) {
             const media = message.envelope.syncMessage.sentMessage.attachments
             if (media) {
                 console.log(media)
-                if (media[0].contentType === "image/jpeg") {
-                    Object.assign(post,{ image: `/media/signal/attachments/${media[0].id}` });
-                    post.tags.push("PHOTO")
-                } else if (media[0].contentType === "video/mp4") {
+                if (["image/jpeg","image/png"].includes(media[0].contentType) ) {
+                    const position = text.match(/https:\/\/maps\.google\.com\/maps[^\s]*/g);
+                    if (position[0]) {
+                        Object.assign(post,{ maps: [`/media/signal/attachments/${media[0].id}`, position[0]] });
+                        Object.assign(post,{ message: text.replace(position[0], "") });
+                        post.tags.push("POSITION")
+                    } else {
+                        Object.assign(post,{ image: `/media/signal/attachments/${media[0].id}` });
+                        post.tags.push("PHOTO")
+                    }
+                        //https://maps.google.com/maps?q=40.81565294926757%2C-16.487109996378422
+                } else if (["video/mp4"].includes(media[0].contentType)) {
                     Object.assign(post,{ video: `/media/signal/attachments/${media[0].id}` });
                     post.tags.push("VIDEO")
+                } else if (["audio/acc","audio/mp4"].includes(media[0].contentType)) {
+                    Object.assign(post,{ audio: `/media/signal/attachments/${media[0].id}` });
+                    post.tags.push("AUDIO")
                 }
             }
     
@@ -73,12 +87,11 @@ for (const message of messages) {
             })
 
             await Deno.writeTextFile(`./messages/message-${post.time}.json`, JSON.stringify(post, null, 4))
-   
         }
     }
 }
 
-if (posts.length != nPosts) { // inserted or deleted
+if (update) { // inserted or deleted
     console.log("Posts updated")
     await Deno.writeTextFile('./messages/messages.json', JSON.stringify(posts, null, 4))
 }
