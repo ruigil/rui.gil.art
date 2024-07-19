@@ -42,6 +42,7 @@ export default function (data: Lume.Data) {
         <link href="https://cesium.com/downloads/cesiumjs/releases/1.119/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
         <script src="/assets/js/components.js" type="module"></script>
         <script src="/assets/js/main.js" type="module"></script>
+        <script src="/assets/js/poiesis.js" type="module"></script>
 
       </head>
       <body>

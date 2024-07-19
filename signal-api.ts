@@ -54,8 +54,10 @@ for (const message of messages) {
                     post.tags.push(...userTags.map((tag:string) => tag.slice(1).toUpperCase()))
                 }
                 text = text.replace(/#\w+/g, "")
-                Object.assign(post,{ message: text });
-                post.tags.push("TEXT")
+                if (text.trim().length > 0) {
+                    Object.assign(post,{ message: text });
+                    post.tags.push("TEXT")
+                }
             }
             
             const media = message.envelope.syncMessage.sentMessage.attachments
@@ -63,7 +65,7 @@ for (const message of messages) {
                 console.log(media)
                 if (["image/jpeg","image/png"].includes(media[0].contentType) ) {
                     const position = text.match(/https:\/\/maps\.google\.com\/maps[^\s]*/g);
-                    if (position[0]) {
+                    if (position && position[0]) {
                         Object.assign(post,{ maps: [`/media/signal/attachments/${media[0].id}`, position[0]] });
                         Object.assign(post,{ message: text.replace(position[0], "") });
                         post.tags.push("POSITION")

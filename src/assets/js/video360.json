@@ -1,0 +1,123 @@
+{
+    "samplers": [
+      {
+        "name": "samp",
+        "group": 0,
+        "binding": 3
+      }
+    ],
+    "storages": {},
+    "uniforms": {
+      "sys": {
+        "align": 16,
+        "size": 48,
+        "name": "sys",
+        "isArray": false,
+        "isStruct": true,
+        "members": {
+          "time": {
+            "arrayCount": 0,
+            "arrayStride": 4,
+            "isArray": false,
+            "isStruct": false,
+            "name": "time",
+            "offset": 0,
+            "size": 4,
+            "type": "f32"
+          },
+          "frame": {
+            "arrayCount": 0,
+            "arrayStride": 4,
+            "isArray": false,
+            "isStruct": false,
+            "name": "frame",
+            "offset": 4,
+            "size": 4,
+            "type": "u32"
+          },
+          "mouse": {
+            "arrayCount": 0,
+            "arrayStride": 16,
+            "isArray": false,
+            "isStruct": false,
+            "name": "mouse",
+            "offset": 16,
+            "size": 16,
+            "type": "f32"
+          },
+          "resolution": {
+            "arrayCount": 0,
+            "arrayStride": 8,
+            "isArray": false,
+            "isStruct": false,
+            "name": "resolution",
+            "offset": 32,
+            "size": 8,
+            "type": "f32"
+          },
+          "aspect": {
+            "arrayCount": 0,
+            "arrayStride": 8,
+            "isArray": false,
+            "isStruct": false,
+            "name": "aspect",
+            "offset": 40,
+            "size": 8,
+            "type": "f32"
+          }
+        },
+        "type": "Sys",
+        "arrayCount": 0,
+        "group": 0,
+        "binding": 0
+      },
+      "params": {
+        "align": 4,
+        "size": 4,
+        "name": "params",
+        "isArray": false,
+        "isStruct": true,
+        "members": {
+          "fov": {
+            "arrayCount": 0,
+            "arrayStride": 4,
+            "isArray": false,
+            "isStruct": false,
+            "name": "fov",
+            "offset": 0,
+            "size": 4,
+            "type": "f32"
+          }
+        },
+        "type": "Params",
+        "arrayCount": 0,
+        "group": 0,
+        "binding": 1
+      }
+    },
+    "textures": [
+      {
+        "name": "video360",
+        "group": 0,
+        "binding": 2
+      }
+    ],
+    "entries": {
+      "vertex": {
+        "inputs": [
+          {
+            "name": "pos",
+            "location": 0,
+            "type": "f32",
+            "size": 8
+          }
+        ],
+        "name": "vertexMain"
+      },
+      "fragment": {
+        "name": "fragmentMain"
+      },
+      "computes": []
+    },
+    "bindGroupLength": 4
+  }

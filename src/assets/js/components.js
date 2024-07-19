@@ -1,3 +1,5 @@
+import { animate } from '/assets/js/poiesis.js';
+
 function timeAgo(timestamp) {
     const now = new Date();
     const past = new Date(parseInt(timestamp));
@@ -150,9 +152,7 @@ class PostComponent extends HTMLElement {
             const regex = /\?q=([^#\s]*)/;
             const match = position.match(regex);
             const queryPart = match ? match[1] : '';
-            console.log(queryPart);
             const [lat, lon] = queryPart.split('%2C').map(decodeURIComponent);
-            console.log(lat, lon);
             const convertToDMS = (coordinate, isLatitude) => {
                 const absolute = Math.abs(coordinate);
                 const degrees = Math.floor(absolute);
@@ -174,6 +174,19 @@ class PostComponent extends HTMLElement {
                 <div class="maps"><div><a href="${position}"><img class="gmap" src="${url}"/></a></div><div class="position"><div>Latitude: <span class="pvalue">${latitude}</span></div> <div>Longitude: <span class="pvalue">${longitude}</span></div></div></div> 
             `
         }
+
+        const imageType = (mainImage) => {
+            if (tags.includes('360'))  {
+                return `<photo-360-viewer main-image='${mainImage}'></photo-360-viewer>`;
+            }
+            return `<img src='${mainImage}' alt="" class="card-image">`;
+        }
+        const videoType = (mainVideo) => {
+            if (tags.includes('360'))  {
+                return `<video-360-viewer main-video='${mainVideo}'></photo-360-viewer>`;
+            }
+            return `<video-player video='${mainVideo}'></video-player>`;
+        }
   
         this.shadowRoot.innerHTML = /*html*/`
             <style>${css}</style>
@@ -190,8 +203,8 @@ class PostComponent extends HTMLElement {
                 </div>
                 <div class="card-body">
                     ${ textMessage && textMessage.trim() !== "" ? `<p class="card-text">${textMessage}</p>` : ``}
-                    ${ mainImage ? `<img src='${mainImage}' alt="Card image" class="card-image">` : ``}
-                    ${ mainVideo ? `<video-player video='${mainVideo}'></video-player>` : ``}
+                    ${ mainImage ? imageType(mainImage) : ``}
+                    ${ mainVideo ? videoType(mainVideo) : ``}
                     ${ mainAudio ? `<audio-player main-audio='${mainAudio}'></audio-player>` : ``}
                     ${ mainMaps ? makePosition(mainMaps) : ``}
                 </div>
@@ -203,6 +216,169 @@ class PostComponent extends HTMLElement {
     }
   
 }
+/* 
+    //const image360 = new Image();
+    //image360.src = "/assets/img/egypt360.jpg";
+    //await image360.decode();
+
+    //const img360bitmap = await createImageBitmap(image360);
+
+var video360 =  __name(async (code, defs) => {
+    const video = document.createElement("video");
+    video.src = "/assets/video/redsea.mp4";
+    video.loop = true;
+    video.muted = true;
+    await video.play();
+    video.pause();
+    document.addEventListener("click", () => {
+      video.muted = false;
+      video.paused ? video.play() : video.pause();
+    });
+    const spec =  __name((w, h) => {
+      return {
+        code,
+        defs,
+        uniforms: () => ({ params: { fov: 90 } }),
+        textures: [
+          { name: "video360", data: video }
+        ]
+      };
+    }, "spec");
+    return spec;
+  }, "video360");
+  
+  document.addEventListener("DOMContentLoaded", async (event) => {
+    const canvas = document.querySelector("#canvas");
+    document.addEventListener("keypress", function(event2) {
+      if (event2.key === "s") {
+        let dataUrl = canvas.toDataURL("image/png");
+        let link = document.createElement("a");
+        link.href = dataUrl;
+        link.download = "video360.png";
+        link.click();
+      }
+    });
+    const fx = "$fx" in window ? $fx : void 0;
+    const code = await (await fetch("./video360.wgsl")).text();
+    const defs = await (await fetch("./video360.json")).json();
+    const spec = await video360(code, defs, fx);
+    false;
+    false;
+    false;
+    const anim = animate(spec, canvas, {});
+    anim.start();
+  });
+  
+*/
+class Video360Viewer extends HTMLElement {
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+    }
+
+    async connectedCallback() {
+        const mainVideo = this.getAttribute('main-video');
+
+        this.shadowRoot.innerHTML = /*html*/`
+            <style>
+                .container {
+                    padding:0px;
+                    margin:0px;
+                    background-color: var(--color-highlight);
+                    display: flex;
+                    flex-direction: column;
+                }
+                #canvas360 {
+                    padding: 0px;
+                    width: 100%;
+                    height: 360px;
+                    margin:0px;
+                }
+                .hint {
+                    font-size: 10px;
+                    padding: 5px;
+                }
+            </style>
+            <div class="container">
+                <canvas id="canvas360"></canvas>
+                <span class="hint">Click the video to play/pause</span>
+            </div>
+        `;
+        this.canvas360 = this.shadowRoot.querySelector('#canvas360');
+        const code = await (await fetch("/assets/js/video360.wgsl")).text();
+        const defs = await (await fetch("/assets/js/video360.json")).json();
+
+        const video = document.createElement("video");
+        video.src = mainVideo;
+        video.loop = true;
+        video.muted = true;
+        await video.play();
+        video.pause();
+        this.canvas360.addEventListener("click", () => {
+            video.muted = false;
+            video.paused ? video.play() : video.pause();
+          });
+                  
+        const spec =  (w, h) => {
+            return {
+              code:code,
+              defs:defs,
+              uniforms: () => ({ params: { fov: 90 } }),
+              textures: [
+                { name: "video360", data: video }
+              ]
+            };
+        };
+        const anim = animate(spec, this.canvas360, {});
+        anim.start();
+    }
+
+}
+
+class Photo360Viewer extends HTMLElement {
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+    }
+
+    async connectedCallback() {
+        const mainImage = this.getAttribute('main-image');
+
+        this.shadowRoot.innerHTML = /*html*/`
+            <style>
+                #canvas360 {
+                    padding: 0px;
+                    width: 100%;
+                    height: 360px;
+                }
+            </style>
+            <canvas id="canvas360"></canvas>
+        `;
+        this.canvas360 = this.shadowRoot.querySelector('#canvas360');
+        const code = await (await fetch("/assets/js/photo360.wgsl")).text();
+        const defs = await (await fetch("/assets/js/photo360.json")).json();
+        const image360 = new Image();
+        image360.src = mainImage;
+        await image360.decode();
+
+        const img360bitmap = await createImageBitmap(image360);
+        
+        const spec =  (w, h) => {
+            return {
+              code:code,
+              defs:defs,
+              uniforms: () => ({ params: { fov: 90 } }),
+              textures: [
+                { name: "photo360", data: img360bitmap }
+              ]
+            };
+        };
+        const anim = animate(spec, this.canvas360, {});
+        anim.start();
+    }
+
+}
+
 
 class AudioWaveformPlayer extends HTMLElement {
     constructor() {
@@ -238,6 +414,7 @@ class AudioWaveformPlayer extends HTMLElement {
                     display: flex;
                     align-items: center;
                     margin-top: 10px;
+
                 }
                 #playPause {
                     background-color: var(--color-background);
@@ -386,14 +563,23 @@ class VideoPlayerComponent extends HTMLElement {
                 display: flex;
                 align-items: center;
                 padding: 10px 10px;
+                background-color: var(--color-highlight);
             }
-            #play-pause {
-                background: none;
+            #playPause {
+                background-color: var(--color-background);
                 border: none;
-                font-size: 24px;
+                padding: 5px 5px;
+                border-radius: 5px;
                 cursor: pointer;
+                font-size: 16px;
                 margin-right: 10px;
             }
+            #timeDisplay {
+                font-size: 14px;
+                color: var(--color-base);
+                padding-left: 10px;
+            }
+
             #time-bar {
                 flex-grow: 1;
                 height: 5px;
@@ -412,10 +598,11 @@ class VideoPlayerComponent extends HTMLElement {
             Your browser does not support the video tag.
             </video>
             <div id="controls">
-            <button id="play-pause">▶️</button>
-            <div id="time-bar">
-                <div id="progress"></div>
-            </div>
+                <button id="playPause">▶️</button>
+                <div id="time-bar">
+                    <div id="progress"></div>
+                </div>
+                <span id="timeDisplay">0:00 / 0:00</span>
             </div>
         </div>
         `;
@@ -423,7 +610,7 @@ class VideoPlayerComponent extends HTMLElement {
 
     setupEventListeners() {
         const video = this.shadowRoot.querySelector('video');
-        const playPauseButton = this.shadowRoot.querySelector('#play-pause');
+        const playPauseButton = this.shadowRoot.querySelector('#playPause');
         const timeBar = this.shadowRoot.querySelector('#time-bar');
 
         playPauseButton.addEventListener('click', () => this.togglePlayPause());
@@ -433,7 +620,7 @@ class VideoPlayerComponent extends HTMLElement {
 
     togglePlayPause() {
         const video = this.shadowRoot.querySelector('video');
-        const playPauseButton = this.shadowRoot.querySelector('#play-pause');
+        const playPauseButton = this.shadowRoot.querySelector('#playPause');
         
         if (video.paused) {
             video.play();
@@ -447,8 +634,18 @@ class VideoPlayerComponent extends HTMLElement {
     updateProgress() {
         const video = this.shadowRoot.querySelector('video');
         const progress = this.shadowRoot.querySelector('#progress');
+        const timeDisplay = this.shadowRoot.querySelector('#timeDisplay');
         const value = (video.currentTime / video.duration) * 100;
         progress.style.width = value + '%';
+        const currentTime = this.formatTime(video.currentTime);
+        const duration = this.formatTime(video.duration);
+        timeDisplay.textContent = `${currentTime} / ${duration}`;
+    }
+    
+    formatTime(time) {
+        const minutes = Math.floor(time / 60);
+        const seconds = Math.floor(time % 60).toString().padStart(2, '0');
+        return `${minutes}:${seconds}`;
     }
 
     seek(event) {
@@ -649,249 +846,9 @@ tagFilter.addEventListener('tagsChanged', (event) => {
     console.log('Selected tags:', event.detail);
 });
 */
-class Video360 extends HTMLElement {
-    constructor() {
-        super();
-        this.attachShadow({mode: 'open'});
-        this.shadowRoot.innerHTML = `
-            <style>
-                :host { display: block; width: 100%; height: 100%; position: relative; }
-                canvas { width: 720px; height: 340px; }
-                button {
-                    position: absolute;
-                    top: 50%;
-                    left: 50%;
-                    transform: translate(-50%, -50%);
-                    padding: 10px 20px;
-                    font-size: 16px;
-                    cursor: pointer;
-                }
-            </style>
-            <canvas width="1440px" height="720px"></canvas>
-            <button id="playButton">Play</button>
-        `;
 
-        this.canvas = this.shadowRoot.querySelector('canvas');
-        this.playButton = this.shadowRoot.getElementById('playButton');
-        this.video = document.createElement('video');
-        this.video.crossOrigin = 'anonymous';
-        this.video.style.display = 'none';
-
-        this.isMouseDown = false;
-        this.mouseX = 0;
-        this.mouseY = 0;
-        this.lon = 0;
-        this.lat = 0;
-        this.fov = 50;
-
-        this.bindedRender = this.render.bind(this);
-        this.bindedHandleMouseDown = this.handleMouseDown.bind(this);
-        this.bindedHandleMouseUp = this.handleMouseUp.bind(this);
-        this.bindedHandleMouseMove = this.handleMouseMove.bind(this);
-        this.bindedHandlePlayClick = this.handlePlayClick.bind(this);
-    }
-
-    connectedCallback() {
-        this.video.src = this.getAttribute('src');
-        this.video.addEventListener('loadedmetadata', this.initWebGL.bind(this));
-
-        this.canvas.addEventListener('mousedown', this.bindedHandleMouseDown);
-        this.canvas.addEventListener('mouseup', this.bindedHandleMouseUp);
-        this.canvas.addEventListener('mousemove', this.bindedHandleMouseMove);
-        this.playButton.addEventListener('click', this.bindedHandlePlayClick);
-        window.addEventListener('resize', this.handleResize.bind(this));
-    }
-
-    disconnectedCallback() {
-        this.canvas.removeEventListener('mousedown', this.bindedHandleMouseDown);
-        this.canvas.removeEventListener('mouseup', this.bindedHandleMouseUp);
-        this.canvas.removeEventListener('mousemove', this.bindedHandleMouseMove);
-        this.playButton.removeEventListener('click', this.bindedHandlePlayClick);
-        window.removeEventListener('resize', this.handleResize);
-    }
-
-    initWebGL() {
-        this.gl = this.canvas.getContext('webgl');
-        if (!this.gl) {
-            console.error('WebGL not supported');
-            return;
-        }
-
-        const vertexShaderSource = `
-            attribute vec2 a_position;
-            varying vec2 v_texCoord;
-            void main() {
-                gl_Position = vec4(a_position, 0, 1);
-                v_texCoord = a_position * 0.5 + 0.5;
-            }
-        `;
-
-        const fragmentShaderSource = `
-            precision mediump float;
-            uniform sampler2D u_texture;
-            uniform float u_fov;
-            uniform float u_aspectRatio;
-            uniform vec2 u_rotation;
-            varying vec2 v_texCoord;
-
-            const float PI = 3.1415926535897932384626433832795;
-
-            void main() {
-                float latitude = (v_texCoord.y - 0.5) * u_fov;
-                float longitude = (v_texCoord.x - 0.5) * u_fov * u_aspectRatio;
-                
-                vec3 dir = vec3(
-                    cos(latitude) * sin(longitude),
-                    sin(latitude),
-                    cos(latitude) * cos(longitude)
-                );
-                
-                float latitude_rot = u_rotation.y;
-                float longitude_rot = u_rotation.x;
-                vec3 dir_rotated = vec3(
-                    dir.x * cos(longitude_rot) - dir.z * sin(longitude_rot),
-                    dir.y * cos(latitude_rot) + dir.x * sin(latitude_rot) * sin(longitude_rot) + dir.z * sin(latitude_rot) * cos(longitude_rot),
-                    -dir.x * sin(longitude_rot) * cos(latitude_rot) + dir.y * sin(latitude_rot) + dir.z * cos(latitude_rot) * cos(longitude_rot)
-                );
-                
-                float u = 0.5 + atan(dir_rotated.x, -dir_rotated.z) / (2.0 * PI);
-                float v = 0.5 - asin(dir_rotated.y) / PI;
-                
-                gl_FragColor = texture2D(u_texture, vec2(u, v));
-            }
-        `;
-
-        const vertexShader = this.createShader(this.gl.VERTEX_SHADER, vertexShaderSource);
-        const fragmentShader = this.createShader(this.gl.FRAGMENT_SHADER, fragmentShaderSource);
-
-        this.program = this.createProgram(vertexShader, fragmentShader);
-
-        const positions = new Float32Array([
-            -1, -1,
-            1, -1,
-            -1, 1,
-            1, 1,
-        ]);
-
-        const positionBuffer = this.gl.createBuffer();
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, positionBuffer);
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, positions, this.gl.STATIC_DRAW);
-
-        const positionLocation = this.gl.getAttribLocation(this.program, 'a_position');
-        this.gl.enableVertexAttribArray(positionLocation);
-        this.gl.vertexAttribPointer(positionLocation, 2, this.gl.FLOAT, false, 0, 0);
-
-        this.texture = this.gl.createTexture();
-        this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
-        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.CLAMP_TO_EDGE);
-        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.CLAMP_TO_EDGE);
-        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR);
-        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.LINEAR);
-
-        this.fovLocation = this.gl.getUniformLocation(this.program, 'u_fov');
-        this.aspectRatioLocation = this.gl.getUniformLocation(this.program, 'u_aspectRatio');
-        this.rotationLocation = this.gl.getUniformLocation(this.program, 'u_rotation');
-
-        this.handleResize();
-    }
-
-    createShader(type, source) {
-        const shader = this.gl.createShader(type);
-        this.gl.shaderSource(shader, source);
-        this.gl.compileShader(shader);
-        if (!this.gl.getShaderParameter(shader, this.gl.COMPILE_STATUS)) {
-            console.error('Shader compile error:', this.gl.getShaderInfoLog(shader));
-            this.gl.deleteShader(shader);
-            return null;
-        }
-        return shader;
-    }
-
-    createProgram(vertexShader, fragmentShader) {
-        const program = this.gl.createProgram();
-        this.gl.attachShader(program, vertexShader);
-        this.gl.attachShader(program, fragmentShader);
-        this.gl.linkProgram(program);
-        if (!this.gl.getProgramParameter(program, this.gl.LINK_STATUS)) {
-            console.error('Program link error:', this.gl.getProgramInfoLog(program));
-            this.gl.deleteProgram(program);
-            return null;
-        }
-        return program;
-    }
-
-    handleResize() {
-        this.canvas.width = this.canvas.clientWidth;
-        this.canvas.height = this.canvas.clientHeight;
-        this.gl.viewport(0, 0, this.canvas.width, this.canvas.height);
-    }
-
-    handlePlayClick() {
-        this.video.play()
-            .then(() => {
-                this.playButton.style.display = 'none';
-                this.render();
-            })
-            .catch(error => {
-                console.error('Error attempting to play video: ', error);
-            });
-    }
-
-    render() {
-        this.gl.clear(this.gl.COLOR_BUFFER_BIT);
-
-        this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
-        this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, this.video);
-
-        this.gl.useProgram(this.program);
-        
-        const aspectRatio = this.gl.canvas.width / this.gl.canvas.height;
-        const fovRad = this.fov * Math.PI / 180;
-        
-        this.gl.uniform1f(this.fovLocation, fovRad);
-        this.gl.uniform1f(this.aspectRatioLocation, aspectRatio);
-        this.gl.uniform2f(this.rotationLocation, this.lon * Math.PI / 180, this.lat * Math.PI / 180);
-
-        this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
-
-        requestAnimationFrame(this.bindedRender);
-    }
-
-    handleMouseDown(e) {
-        this.isMouseDown = true;
-        this.mouseX = e.clientX;
-        this.mouseY = e.clientY;
-    }
-
-    handleMouseUp() {
-        this.isMouseDown = false;
-    }
-
-    handleMouseMove(e) {
-        if (this.isMouseDown) {
-            const dx = e.clientX - this.mouseX;
-            const dy = e.clientY - this.mouseY;
-            this.mouseX = e.clientX;
-            this.mouseY = e.clientY;
-            this.lon += dx * 0.1;
-            this.lat += dy * 0.1;
-            
-            // Wrap around vertically
-            if (this.lat > 90) {
-                this.lat = 180 - this.lat;
-                this.lon += 180;
-            } else if (this.lat < -90) {
-                this.lat = -180 - this.lat;
-                this.lon += 180;
-            }
-            
-            // Wrap around horizontally
-            this.lon = ((this.lon % 360) + 360) % 360;
-        }
-    }
-}
-
-customElements.define('video-360', Video360);
+customElements.define('video-360-viewer', Video360Viewer);
+customElements.define('photo-360-viewer', Photo360Viewer);
 customElements.define('os-post', PostComponent);
 customElements.define('os-posts', PostsFilterComponent);
 customElements.define('video-player', VideoPlayerComponent);
